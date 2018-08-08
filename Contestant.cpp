@@ -66,13 +66,27 @@ ContactResult Contestant::Contact(Contestant player) {
     else if(type == "angel" && player.GetType() == "angel") {
         resultCount = vaccineCount + 1;
     }
+
     ContactResult result(resultType, resultCount);
+
+    contactedList.push_back(player.GetName());
+
     return result;
 }
 
 void Contestant::SetContactResult(ContactResult result) {
     type = result.GetType();
     vaccineCount = result.GetCount();
+}
+
+bool Contestant::CheckContact(Contestant player) {
+    bool result = false;
+    for(int i = 0; i < contactedList.size(); ++i) {
+        if(player.GetName() == contactedList.at(i)) {
+            result = true;
+        }
+    }
+    return result;
 }
 string Contestant::ToString() {
     string stringStatus = "true";

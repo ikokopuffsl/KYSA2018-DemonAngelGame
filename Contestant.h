@@ -25,6 +25,7 @@ class Contestant {
     void Reset(); //Resets status = angel, type = angel, vaccineCount = 0;
     ContactResult Contact(Contestant player);
     void SetContactResult(ContactResult result);
+    bool CheckContact(Contestant player);
     string ToString();
     
 
@@ -33,5 +34,5 @@ class Contestant {
     bool status;
     string type;
     int vaccineCount;
-    
+    vector<string> contactedList;
 };

@@ -12,7 +12,7 @@ using namespace std;
  *                                                                          *
  *                                                                          *
  * *************************************************************************/
-int DuplicateChecker(string name, vector<Contestant> &listOfParticipants) {
+int DuplicateNameChecker(string name, vector<Contestant> &listOfParticipants) {
     for(int i = 0; i < listOfParticipants.size(); ++i) {
         if (name == listOfParticipants.at(i).GetName()) {
             return i;
@@ -20,14 +20,14 @@ int DuplicateChecker(string name, vector<Contestant> &listOfParticipants) {
     }
     return -1;
 }    
-string InputValidator(string input, string option, vector<Contestant> &listOfParticipants) {
+string AddInputValidator(string input, string option, vector<Contestant> &listOfParticipants) {
     if (option == "name") {
-        while(DuplicateChecker(input, listOfParticipants) >= 0) {
+        while(DuplicateNameChecker(input, listOfParticipants) >= 0) {
             cout << "Name already exist. Choose a new name" << endl;
             cin >> input;
         }
     }
-    else if (option == "status") {
+    else if (option == "type") {
         while(input != "demon" && input != "sinner" && input != "angel") {
             cout << "Invalid Option. Choose demon, sinner, or angel" << endl;
             cin >> input;
@@ -45,16 +45,33 @@ bool InvalidSize(vector<Contestant> &listOfParticipants) {
 }
 
 void PrintNames(vector<Contestant> &listOfParticipants) {
+
+    cout << "List of Players" << endl;
     for(int i = 0; i < listOfParticipants.size(); ++i) {
-        cout << "i: " << listOfParticipants.at(i).GetName() << endl;
+        cout << i << " : " << listOfParticipants.at(i).GetName() << endl;
     }
 }
+bool IndexValidator(int index, vector<Contestant> &listOfParticipants) {
+    bool result = true;
+    if (cin.fail()) {
+        cin.clear();
+        cin.ignore(1000, '\n');
+        result = false;
+    }
+    else if (index < 0 || index >= listOfParticipants.size()) {
+        cout << "Invalid Number. Please enter a number between 0 and " << listOfParticipants.size() - 1 << endl;
+        result = false;
+    }
+    return result;
+}
 void PrintMenu() {
-    cout << "Here are the menu options" << endl;
-
+    cout << "*****************************" << endl;
+    cout << "* Here are the menu options *" << endl;
+    cout << "*****************************" << endl;
     //Set up
     cout << endl;
-    cout << "\t\t\tGame Set Up" << endl;
+    cout << "Game Set Up" << endl;
+    cout << "===========" << endl;
     cout << "menu - print the menu" << endl;
     cout << "add - Adds a new player" << endl;
     cout << "remove - Remove a player" << endl;
@@ -62,21 +79,24 @@ void PrintMenu() {
     cout << "clearAll - Clears all data" << endl;
     cout << "export - Export data to text file" << endl;
     cout << "log - Logs all appropriate user input" << endl;
+    cout << "read - Read in data from text file to set up game" << endl;
 
     //Game Play
     cout << endl;
-    cout << "\t\t\tGame Play" << endl;
+    cout << "Game Play" << endl;
+    cout << "=========" << endl;
     cout << "print - Print everyone's status" << endl;
-    cout << "printInd - Print individual's status" << endl; //Possibly not needed
     cout << "contact - Two players connect" << endl;
     cout << "check - Player checks their status(one per round)" << endl;
     cout << "next - Goes to next round. Reset check status" << endl;
 
     //Other
     cout << endl;
-    cout << "\t\t\tOther Options" << endl;
+    cout << "Other Options" << endl;
+    cout << "=============" << endl;
     cout << "setType - Manually set type(demon, sinner, angel)" << endl;
     cout << "setVaccine - Manually set vaccince count" << endl;
+    cout << "quit - Exits the game" << endl;
 
 }
 /********************************* SET UP ***********************************
@@ -88,12 +108,12 @@ void AddPlayer(vector<Contestant> &listOfParticipants) {
     string status = "";
     string name = "";
 
-    cout << "Enter name" << endl;
+    cout << "Enter name (One Word)" << endl;
     cin >> name;
-    name = InputValidator(name, "name", listOfParticipants);
-    cout << "Enter status (demon, sinner, angel)" << endl;
+    name = AddInputValidator(name, "name", listOfParticipants);
+    cout << "Enter type (demon, sinner, angel)" << endl;
     cin >> status;
-    status = InputValidator(status, "type", listOfParticipants);
+    status = AddInputValidator(status, "type", listOfParticipants);
 
     listOfParticipants.push_back(Contestant(name, status));
 
@@ -102,22 +122,18 @@ void AddPlayer(vector<Contestant> &listOfParticipants) {
 void RemovePlayer(vector<Contestant> &listOfParticipants) {
     if(InvalidSize(listOfParticipants)) return;
     
-    string name = ""; 
+    int index = -1; 
 
     PrintNames(listOfParticipants);
 
-    cout << "Who would you like to remove?" << endl;
-    cin >> name;
+    cout << "Who would you like to remove? Please enter the ID of player (0 - " << listOfParticipants.size() - 1 << ")" << endl;
+    cin >> index;
 
-    int index = DuplicateChecker(name, listOfParticipants);
+    if(!IndexValidator(index, listOfParticipants)) return;
+    
+    cout << listOfParticipants.at(index).GetName() << " successfully removed" << endl;
 
-    if (index >= 0) {
-        listOfParticipants.erase(listOfParticipants.begin() + index);
-        cout << name << " successfully removed" << endl;
-    }
-    else {
-        cout << name << " does not exist" << endl;
-    }
+    listOfParticipants.erase(listOfParticipants.begin() + index);
 }
 void Restart(vector<Contestant> &listOfParticipants) {
     for(int i = 0; i < listOfParticipants.size(); ++i) {
@@ -130,15 +146,17 @@ void ClearAll(vector<Contestant> &listOfParticipants) {
     cout << "Clear All Successful" << endl;
 }
 void ExportToText(vector<Contestant> &listOfParticipants) {
-
-
+    cout << "Not Done Yet" << endl;
     cout << "Export To Text Successful. Please check your folder for ExportText.txt" << endl;
 }
+void ImportFromText(vector<Contestant> &listOfParticipants) {
+    cout << "Not done yet" << endl;
+    cout << "Imported data successfully!" << endl;
+}
 void LogHelper() {
-
 }
 void LogActivity() {
-
+    cout << "Not done yet" << endl;
     cout << "Log Activity Successful. Please check your folder for LogActivity.txt" << endl;
 }
 
@@ -149,81 +167,61 @@ void LogActivity() {
 void PrintEveryoneStatus(vector<Contestant> &listOfParticipants) {
     if(InvalidSize(listOfParticipants)) return;
     
-    cout << left << setw(20) << "Name: " << setw(10) << "Type" << setw(10) << "Vaccine" << setw(10) << "Checked" << endl;
-    cout << left << setw(20) << "======" << setw(10) << "====" << setw(10) << "=======" << setw(10) << "=======" << endl;
+    cout << left << setw(4) << "ID" << setw(20) << "Name: " << setw(10) << "Type" << setw(10) << "Vaccine" << setw(10) << "Checked" << endl;
+    cout << left << setw(4) << "==" << setw(20) << "======" << setw(10) << "====" << setw(10) << "=======" << setw(10) << "=======" << endl;
     for(int i = 0; i < listOfParticipants.size(); ++i) {
-        cout << listOfParticipants.at(i).ToString();
-    }
-}
-
-void PrintIndividualStatus(vector<Contestant> &listOfParticipants) {
-    if(InvalidSize(listOfParticipants)) return;
-    string name;
-
-    cout << "Enter name of player you wish to check" << endl;
-    cin >> name;
-
-    int playerIndex = DuplicateChecker(name, listOfParticipants);
-
-    if (playerIndex < 0) {
-        cout << name << " does not exist. Or there are no contestants." << endl;
-    }
-    else {
-        cout << left << setw(20) << "Name: " << setw(10) << "Type" << setw(10) << "Vaccine" << setw(10) << "Checked" << endl;
-        cout << left << setw(20) << "======" << setw(10) << "====" << setw(10) << "=======" << setw(10) << "=======" << endl;
-        cout << listOfParticipants.at(playerIndex).ToString();
+        cout << setw(2) << i << setw(2) << ":" << listOfParticipants.at(i).ToString();
     }
 }
 
 void Contact(vector<Contestant> &listOfParticipants) {
-    string playerA = "";
-    string playerB = "";
+    if(InvalidSize(listOfParticipants)) return;
 
-    cout << "Enter name of player first player" << endl;
-    cin >> playerA;
-    cout << "Enter name of second player" << endl;
-    cin >> playerB;
+    PrintNames(listOfParticipants);
 
-    int indexA = DuplicateChecker(playerA, listOfParticipants);
-    int indexB = DuplicateChecker(playerB, listOfParticipants);
+    int indexA = -1;
+    int indexB = -1;
 
-    if (indexA >= 0 && indexB >= 0) { 
-        ContactResult playerAResult = listOfParticipants.at(indexA).Contact(listOfParticipants.at(indexB));
-        ContactResult playerBResult = listOfParticipants.at(indexB).Contact(listOfParticipants.at(indexA));
+    cout << "Enter the ID of 2 players (Example: 1 3)" << endl;
+    cin >> indexA >> indexB;
+
+    if(!IndexValidator(indexA, listOfParticipants) || !IndexValidator(indexB, listOfParticipants)) return;
+    
+    if(listOfParticipants.at(indexA).CheckContact(listOfParticipants.at(indexB))) {
+        cout << "Already contacted, cannot contact until new game" << endl;
+        return;
+    }
+
+    ContactResult playerAResult = listOfParticipants.at(indexA).Contact(listOfParticipants.at(indexB));
+    ContactResult playerBResult = listOfParticipants.at(indexB).Contact(listOfParticipants.at(indexA));
         
-        listOfParticipants.at(indexA).SetContactResult(playerAResult);
-        listOfParticipants.at(indexB).SetContactResult(playerBResult);
-    }
-    else {
-        cout << playerA << " or " << playerB << " does not exist." << endl;
-    }
+    listOfParticipants.at(indexA).SetContactResult(playerAResult);
+    listOfParticipants.at(indexB).SetContactResult(playerBResult);
+
+    cout << listOfParticipants.at(indexA).GetName() << " and " << listOfParticipants.at(indexB).GetName() << " have made contact" << endl;
 }
 
 void CheckStatus(vector<Contestant> &listOfParticipants) {
     if(InvalidSize(listOfParticipants)) return;
 
-    string name = "";
+    int index = -1;
+
+    PrintNames(listOfParticipants);
     
-    cout << "Enter name of player who wants to check their status" << endl;
-    cin >> name;
+    cout << "Enter the ID of player who wants to check their status" << endl;
+    cin >> index;
 
-    int playerIndex = DuplicateChecker(name, listOfParticipants);
+    if(!IndexValidator(index, listOfParticipants)) return;
 
-    if (playerIndex >= 0) {
-        if (listOfParticipants.at(playerIndex).GetStatus()) {
-            cout << name << " has already checked their status this round. Please wait until the next round" << endl;
-        }
-        else {
-            listOfParticipants.at(playerIndex).SetStatus(true);
-            cout << left << setw(20) << "Name: " << setw(10) << "Type" << setw(10) << "Vaccine" << endl;
-            cout << left << setw(20) << "======" << setw(10) << "====" << setw(10) << "=======" << endl;
-            cout << left << setw(20) << name << setw(10) << listOfParticipants.at(playerIndex).GetType() << setw(10) << listOfParticipants.at(playerIndex).GetVaccineCount();
-        }
+    if (listOfParticipants.at(index).GetStatus()) {
+        cout << listOfParticipants.at(index).GetName() << " has already checked their status this round. Please wait until the next round" << endl;
     }
     else {
-        cout << name << " does not exist." << endl;
+        listOfParticipants.at(index).SetStatus(true);
+        cout << left << setw(20) << "Name: " << setw(10) << "Type" << setw(10) << "Vaccine" << endl;
+        cout << left << setw(20) << "======" << setw(10) << "====" << setw(10) << "=======" << endl;
+        cout << left << setw(20) << listOfParticipants.at(index).GetName() << setw(10) << listOfParticipants.at(index).GetType() << setw(10) << listOfParticipants.at(index).GetVaccineCount();
     }
-
 }
 
 void NextRound(vector<Contestant> &listOfParticipants) {
@@ -244,61 +242,59 @@ void NextRound(vector<Contestant> &listOfParticipants) {
 void SetType(vector<Contestant> &listOfParticipants) {
     if(InvalidSize(listOfParticipants)) return;
 
-    string name = "";
+    int index = -1;
     string status = "";
 
-    cout << "What player's type would you like to set?" << endl;    
-    cin >> name;
-    cout << "Enter status (demon, sinner, angel)" << endl;
+    PrintNames(listOfParticipants);
+
+    cout << "Please enter ID of player" << endl;    
+    cin >> index;
+    cout << "Please enter type (demon, sinner, angel)" << endl;
     cin >> status;
-    status = InputValidator(status, "status", listOfParticipants);
+    status = AddInputValidator(status, "status", listOfParticipants);
 
-    int playerIndex = DuplicateChecker(name, listOfParticipants);
+    if(!IndexValidator(index, listOfParticipants)) return;
 
-    if (playerIndex >= 0) {
-        cout << name << " successfully set from " << listOfParticipants.at(playerIndex).GetType()
-            << " to " << status << endl;
-        listOfParticipants.at(playerIndex).SetType(status);
-    }
-    else {
-        cout << name << " does not exist." << endl;
-    }
+    cout << listOfParticipants.at(index).GetName() << " successfully set from " << listOfParticipants.at(index).GetType()
+        << " to " << status << endl;
+    listOfParticipants.at(index).SetType(status);
 }
 
 void SetVaccineCount(vector<Contestant> &listOfParticipants) {
     if(InvalidSize(listOfParticipants)) return;
 
-    string name = "";
+    int index = -1;
     int vaccineCount = -1;
 
-    cout << "What player's vaccine count would you like to set?" << endl;    
-    cin >> name;
+    PrintNames(listOfParticipants);
+
+    cout << "Please enter ID of player" << endl;    
+    cin >> index;
     cout << "Enter new vaccine count" << endl;
     cin >> vaccineCount;
 
-    int playerIndex = DuplicateChecker(name, listOfParticipants);
+    if(!IndexValidator(index, listOfParticipants)) return;
 
-    if (playerIndex >= 0) {
-        cout << name << " successfully set from " << listOfParticipants.at(playerIndex).GetVaccineCount()
-            << " to " << vaccineCount << endl;
-        listOfParticipants.at(playerIndex).SetVaccineCount(vaccineCount);
-    }
-    else {
-        cout << name << " does not exist." << endl;
-    }
+    cout << listOfParticipants.at(index).GetName() << " successfully set from " << listOfParticipants.at(index).GetVaccineCount()
+        << " to " << vaccineCount << endl;
+    listOfParticipants.at(index).SetVaccineCount(vaccineCount);
 }
 
 int main() {
     vector<Contestant> listOfParticipants;
     string userOption = "";
 
-    cout << "******************************" << endl;
-    cout << "*";
+    cout << "\t\t\t\t\t********************************************" << endl;
+    cout << "\t\t\t\t\t* Welcome to the Demon and Angel Simulator *" << endl;
+    cout << "\t\t\t\t\t********************************************" << endl;
+
     PrintMenu();
 
     do {
         cout << endl;
-        cout << "Please enter an option" << endl << endl;
+        cout << "**************************" << endl;
+        cout << "* Please enter an option *" << endl;
+        cout << "**************************" << endl;
         cin >> userOption;
         cin.ignore(1000, '\n'); //If there is excess input I want to ignore all of it
 
@@ -323,11 +319,11 @@ int main() {
         else if(userOption == "log") {
             LogActivity();
         }
+        else if(userOption == "import") {
+            ImportFromText(listOfParticipants);
+        }        
         else if(userOption == "print") {
             PrintEveryoneStatus(listOfParticipants);
-        }
-        else if(userOption == "printInd") {
-            PrintIndividualStatus(listOfParticipants);
         }
         else if(userOption == "contact") {
             Contact(listOfParticipants);
