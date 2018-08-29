@@ -2,12 +2,16 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+#include <sstream>
 //Need file includes
 
 #include "Contestant.h"
 #include "ContactResult.h"
 using namespace std;
 
+//Unfortunate Global Variable
+ stringstream Log;
+ int round = 0;
 /********************************* UTILITY **********************************
  *                                                                          *
  *                                                                          *
@@ -97,6 +101,7 @@ void PrintMenu() {
     cout << "setType - Manually set type(demon, sinner, angel)" << endl;
     cout << "setVaccine - Manually set vaccince count" << endl;
     cout << "quit - Exits the game" << endl;
+    cout << endl;
 
 }
 /********************************* SET UP ***********************************
@@ -118,6 +123,7 @@ void AddPlayer(vector<Contestant> &listOfParticipants) {
     listOfParticipants.push_back(Contestant(name, status));
 
     cout << name << " successfully added" << endl;
+    Log << "Player Added: " << name << " " << status << endl << endl;
 }
 void RemovePlayer(vector<Contestant> &listOfParticipants) {
     if(InvalidSize(listOfParticipants)) return;
@@ -132,32 +138,40 @@ void RemovePlayer(vector<Contestant> &listOfParticipants) {
     if(!IndexValidator(index, listOfParticipants)) return;
     
     cout << listOfParticipants.at(index).GetName() << " successfully removed" << endl;
-
+    Log << "Player Removed: " << listOfParticipants.at(index).GetName() << endl << endl;
     listOfParticipants.erase(listOfParticipants.begin() + index);
+
 }
 void Restart(vector<Contestant> &listOfParticipants) {
     for(int i = 0; i < listOfParticipants.size(); ++i) {
         listOfParticipants.at(i).Reset();
     }
     cout << "Reset Successful" << endl;
+    Log << "Game Restart (Current players stats all reset)" << endl << endl;
+    round = 0;
 }
 void ClearAll(vector<Contestant> &listOfParticipants) {
     listOfParticipants.clear();
     cout << "Clear All Successful" << endl;
+    Log << "Everything removed (Players and Stats)" << endl << endl;
+    round = 0;
 }
 void ExportToText(vector<Contestant> &listOfParticipants) {
     cout << "Not Done Yet" << endl;
     cout << "Export To Text Successful. Please check your folder for ExportText.txt" << endl;
+    Log << "Game Data Exported" << endl;
 }
 void ImportFromText(vector<Contestant> &listOfParticipants) {
     cout << "Not done yet" << endl;
     cout << "Imported data successfully!" << endl;
+    Log << "Game Data Imported" << endl;
 }
 void LogHelper() {
+    //Not needed
 }
 void LogActivity() {
-    cout << "Not done yet" << endl;
-    cout << "Log Activity Successful. Please check your folder for LogActivity.txt" << endl;
+    //cout << "Log Activity Successful. Please check your folder for LogActivity.txt" << endl;
+    cout << Log.str();
 }
 
 /********************************* Game Play ********************************
@@ -192,6 +206,12 @@ void Contact(vector<Contestant> &listOfParticipants) {
         return;
     }
 
+    string statusA = listOfParticipants.at(indexA).GetType();
+    string statusB = listOfParticipants.at(indexB).GetType();
+    // string statusAString = "";
+    // string statusBString = "";
+    // (statusA == 0) statusAString = ""
+
     ContactResult playerAResult = listOfParticipants.at(indexA).Contact(listOfParticipants.at(indexB));
     ContactResult playerBResult = listOfParticipants.at(indexB).Contact(listOfParticipants.at(indexA));
         
@@ -199,6 +219,11 @@ void Contact(vector<Contestant> &listOfParticipants) {
     listOfParticipants.at(indexB).SetContactResult(playerBResult);
 
     cout << listOfParticipants.at(indexA).GetName() << " and " << listOfParticipants.at(indexB).GetName() << " have made contact" << endl;
+    Log << "Contact: " << listOfParticipants.at(indexA).GetName() << " and " << listOfParticipants.at(indexB).GetName() << " have made contact" << endl;
+    Log << "Contact: " << listOfParticipants.at(indexA).GetName() << " was " << statusA << " and now is " << listOfParticipants.at(indexA).GetType() << endl;
+    Log << "Contact: " << listOfParticipants.at(indexB).GetName() << " was " << statusB << " and now is " << listOfParticipants.at(indexB).GetType() << endl;
+    Log << endl;
+
 }
 
 void CheckStatus(vector<Contestant> &listOfParticipants) {
@@ -221,17 +246,21 @@ void CheckStatus(vector<Contestant> &listOfParticipants) {
         cout << left << setw(20) << "Name: " << setw(10) << "Type" << setw(10) << "Vaccine" << endl;
         cout << left << setw(20) << "======" << setw(10) << "====" << setw(10) << "=======" << endl;
         cout << left << setw(20) << listOfParticipants.at(index).GetName() << setw(10) << listOfParticipants.at(index).GetType() << setw(10) << listOfParticipants.at(index).GetVaccineCount();
+        Log << "CheckStatus: " << listOfParticipants.at(index).GetName() << " checked their status. " << endl << endl;
     }
 }
 
 void NextRound(vector<Contestant> &listOfParticipants) {
     if(InvalidSize(listOfParticipants)) return;
-
+    
     cout << "Starting Next Round" << endl;
     for (int i = 0; i < listOfParticipants.size(); ++i) {
         listOfParticipants.at(i).SetStatus(false);
     }
     cout << "All players status have been reset" << endl;
+    Log << "************************************" << endl;
+    Log << "NextRound: Round - " << ++round << "               *" << endl;
+    Log << "************************************" << endl << endl;
 }
 
 /********************************* Other ************************************
@@ -258,6 +287,8 @@ void SetType(vector<Contestant> &listOfParticipants) {
     cout << listOfParticipants.at(index).GetName() << " successfully set from " << listOfParticipants.at(index).GetType()
         << " to " << status << endl;
     listOfParticipants.at(index).SetType(status);
+    Log << "SetType: " << listOfParticipants.at(index).GetName() << " successfully set from " << listOfParticipants.at(index).GetType()
+        << " to " << status << endl << endl;
 }
 
 void SetVaccineCount(vector<Contestant> &listOfParticipants) {
@@ -278,20 +309,27 @@ void SetVaccineCount(vector<Contestant> &listOfParticipants) {
     cout << listOfParticipants.at(index).GetName() << " successfully set from " << listOfParticipants.at(index).GetVaccineCount()
         << " to " << vaccineCount << endl;
     listOfParticipants.at(index).SetVaccineCount(vaccineCount);
+    Log << "SetVaccineCount: " << listOfParticipants.at(index).GetName() << " successfully set from " << listOfParticipants.at(index).GetVaccineCount()
+        << " to " << vaccineCount << endl << endl;
 }
 
 int main() {
     vector<Contestant> listOfParticipants;
     string userOption = "";
+   
 
     cout << "\t\t\t\t\t********************************************" << endl;
     cout << "\t\t\t\t\t* Welcome to the Demon and Angel Simulator *" << endl;
     cout << "\t\t\t\t\t********************************************" << endl;
-
-    PrintMenu();
-
+    Log << endl;
+    Log << "Game Started" << endl << endl;
+    Log << "************************************" << endl;
+    Log << "* Round - " << ++round << "                        *" << endl;
+    Log << "************************************" << endl << endl;
     do {
         cout << endl;
+        cout << endl << endl << endl << endl << endl << endl;
+        PrintMenu();
         cout << "**************************" << endl;
         cout << "* Please enter an option *" << endl;
         cout << "**************************" << endl;
@@ -360,9 +398,3 @@ int main() {
 
     return 0;
 }
-
-
-
-
-801 287 4664 
-209
