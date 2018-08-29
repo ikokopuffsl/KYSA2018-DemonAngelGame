@@ -143,18 +143,28 @@ void RemovePlayer(vector<Contestant> &listOfParticipants) {
 
 }
 void Restart(vector<Contestant> &listOfParticipants) {
+    round = 0;
     for(int i = 0; i < listOfParticipants.size(); ++i) {
         listOfParticipants.at(i).Reset();
     }
     cout << "Reset Successful" << endl;
+    Log.str("");
     Log << "Game Restart (Current players stats all reset)" << endl << endl;
-    round = 0;
+    Log << "Game Started" << endl << endl;
+    Log << "************************************" << endl;
+    Log << "* Round - " << ++round << "                        *" << endl;
+    Log << "************************************" << endl << endl;
 }
 void ClearAll(vector<Contestant> &listOfParticipants) {
+    round = 0;
     listOfParticipants.clear();
+    Log.str("");
     cout << "Clear All Successful" << endl;
     Log << "Everything removed (Players and Stats)" << endl << endl;
-    round = 0;
+    Log << "Game Started" << endl << endl;
+    Log << "************************************" << endl;
+    Log << "* Round - " << ++round << "                        *" << endl;
+    Log << "************************************" << endl << endl;
 }
 void ExportToText(vector<Contestant> &listOfParticipants) {
     cout << "Not Done Yet" << endl;
