@@ -3,6 +3,7 @@
 #include <vector>
 #include <iomanip>
 #include <sstream>
+#include <fstream>
 //Need file includes
 
 #include "Contestant.h"
@@ -12,6 +13,8 @@ using namespace std;
 //Unfortunate Global Variable
  stringstream Log;
  int round = 0;
+ ofstream writeFile;
+ ifstream readFile;
 /********************************* UTILITY **********************************
  *                                                                          *
  *                                                                          *
@@ -81,9 +84,8 @@ void PrintMenu() {
     cout << "remove - Remove a player" << endl;
     cout << "restart - Restart the game (Keep current users)" << endl;
     cout << "clearAll - Clears all data" << endl;
-    cout << "export - Export data to text file" << endl;
-    cout << "log - Logs all appropriate user input" << endl;
-    cout << "read - Read in data from text file to set up game" << endl;
+    cout << "log - Prints out game summary" << endl;
+    cout << "import - Set up game from text file" << endl;
 
     //Game Play
     cout << endl;
@@ -110,20 +112,20 @@ void PrintMenu() {
  * *************************************************************************/                                         
 
 void AddPlayer(vector<Contestant> &listOfParticipants) {
-    string status = "";
+    string type = "";
     string name = "";
 
     cout << "Enter name (One Word)" << endl;
     cin >> name;
     name = AddInputValidator(name, "name", listOfParticipants);
     cout << "Enter type (demon, sinner, angel)" << endl;
-    cin >> status;
-    status = AddInputValidator(status, "type", listOfParticipants);
+    cin >> type;
+    type = AddInputValidator(type, "type", listOfParticipants);
 
-    listOfParticipants.push_back(Contestant(name, status));
+    listOfParticipants.push_back(Contestant(name, type));
 
     cout << name << " successfully added" << endl;
-    Log << "Player Added: " << name << " " << status << endl << endl;
+    Log << "Player Added: " << name << " " << type << endl << endl;
 }
 void RemovePlayer(vector<Contestant> &listOfParticipants) {
     if(InvalidSize(listOfParticipants)) return;
@@ -167,14 +169,58 @@ void ClearAll(vector<Contestant> &listOfParticipants) {
     Log << "************************************" << endl << endl;
 }
 void ExportToText(vector<Contestant> &listOfParticipants) {
-    cout << "Not Done Yet" << endl;
-    cout << "Export To Text Successful. Please check your folder for ExportText.txt" << endl;
-    Log << "Game Data Exported" << endl;
+    //cout << "Export To Text Successful. Please check your folder for ExportText.txt" << endl;
+    //Log << "Game Data Exported" << endl;
+    stringstream temp;
+    vector<string> contactedList;
+
+    // writeFile.open("ExportText.txt", ios::app);
+    writeFile.open("ExportText.txt");
+    for(int i = 0; i < listOfParticipants.size(); ++i) {
+        writeFile << setw(2) << i << setw(2) << ": " << listOfParticipants.at(i).ToString();
+
+        contactedList = listOfParticipants.at(i).GetContactedList();
+        for(int j = 0; j < contactedList.size(); ++j) {
+            writeFile << " " << contactedList.at(j);
+        }
+        writeFile << " done-1" << endl;
+    }
+    writeFile.close();
+    //cout << "Finish export" << endl;
 }
 void ImportFromText(vector<Contestant> &listOfParticipants) {
-    cout << "Not done yet" << endl;
     cout << "Imported data successfully!" << endl;
     Log << "Game Data Imported" << endl;
+
+    string statusString = "";
+    bool status = false;
+    string name = "";
+    string type = "";
+    int vaccineCount = 0;
+    vector<string>contactedList;
+    string contacted = "";
+
+
+    readFile.open("ExportText.txt");
+    while(!readFile.eof()) {
+        contactedList.clear();
+        readFile >> contacted;
+        readFile >> name;
+        readFile >> type;
+        readFile >> vaccineCount;
+        readFile >> statusString;
+        (statusString == "false") ? status = false : status = true;
+        while(contacted != "done-1") {
+            readFile >> contacted;
+            contactedList.push_back(contacted);
+        }
+        Contestant mContestant(name, type);
+        mContestant.SetVaccineCount(vaccineCount);
+        mContestant.SetStatus(status);
+        mContestant.SetContactedList(contactedList);
+        listOfParticipants.push_back(mContestant);
+    }
+    readFile.close();
 }
 void LogHelper() {
     //Not needed
@@ -218,9 +264,8 @@ void Contact(vector<Contestant> &listOfParticipants) {
 
     string statusA = listOfParticipants.at(indexA).GetType();
     string statusB = listOfParticipants.at(indexB).GetType();
-    // string statusAString = "";
-    // string statusBString = "";
-    // (statusA == 0) statusAString = ""
+    int vaccineCountA = listOfParticipants.at(indexA).GetVaccineCount();
+    int vaccineCountB = listOfParticipants.at(indexB).GetVaccineCount();
 
     ContactResult playerAResult = listOfParticipants.at(indexA).Contact(listOfParticipants.at(indexB));
     ContactResult playerBResult = listOfParticipants.at(indexB).Contact(listOfParticipants.at(indexA));
@@ -229,9 +274,10 @@ void Contact(vector<Contestant> &listOfParticipants) {
     listOfParticipants.at(indexB).SetContactResult(playerBResult);
 
     cout << listOfParticipants.at(indexA).GetName() << " and " << listOfParticipants.at(indexB).GetName() << " have made contact" << endl;
-    Log << "Contact: " << listOfParticipants.at(indexA).GetName() << " and " << listOfParticipants.at(indexB).GetName() << " have made contact" << endl;
-    Log << "Contact: " << listOfParticipants.at(indexA).GetName() << " was " << statusA << " and now is " << listOfParticipants.at(indexA).GetType() << endl;
-    Log << "Contact: " << listOfParticipants.at(indexB).GetName() << " was " << statusB << " and now is " << listOfParticipants.at(indexB).GetType() << endl;
+    Log << "Contact: " << listOfParticipants.at(indexA).GetName() << "(" << statusA << " - " << vaccineCountA << ") and "
+        << listOfParticipants.at(indexB).GetName() << "(" << statusB << " - " << vaccineCountB << ") have made contact" << endl;
+    Log << "Contact Result: " << listOfParticipants.at(indexA).GetName() << " is a(n) " << listOfParticipants.at(indexA).GetType() << endl;
+    Log << "Contact Result: " << listOfParticipants.at(indexB).GetName() << " is a(n) " << listOfParticipants.at(indexB).GetType() << endl;
     Log << endl;
 
 }
@@ -328,6 +374,7 @@ int main() {
     string userOption = "";
    
 
+
     cout << "\t\t\t\t\t********************************************" << endl;
     cout << "\t\t\t\t\t* Welcome to the Demon and Angel Simulator *" << endl;
     cout << "\t\t\t\t\t********************************************" << endl;
@@ -361,15 +408,13 @@ int main() {
         else if(userOption == "clearAll") {
             ClearAll(listOfParticipants);
         }
-        else if(userOption == "export") {
-            ExportToText(listOfParticipants);
-        }
         else if(userOption == "log") {
             LogActivity();
         }
         else if(userOption == "import") {
-            ImportFromText(listOfParticipants);
-        }        
+            cout << "Not working yet" << endl;
+            //ImportFromText(listOfParticipants);
+        }     
         else if(userOption == "print") {
             PrintEveryoneStatus(listOfParticipants);
         }
@@ -397,8 +442,8 @@ int main() {
         }
         else {
             cout << "Invalid Input. Here is the menu." << endl;
-            PrintMenu();
         }
+        ExportToText(listOfParticipants);
 
     } while (userOption != "quit");
 

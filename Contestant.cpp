@@ -5,6 +5,7 @@ Contestant::Contestant(string name, string type) {
     this->type = type;
     vaccineCount = 0;
     status = false;
+    contactedList.push_back(name);
 }
 
 string Contestant::GetName() {
@@ -22,6 +23,10 @@ string Contestant::GetType() {
 int Contestant::GetVaccineCount() {
     return vaccineCount;
 }
+vector<string> Contestant::GetContactedList() {
+    return contactedList;
+}
+
 
 void Contestant::Contestant::SetName(string name) {
     this->name = name;
@@ -38,11 +43,17 @@ void Contestant::SetType(string type) {
 void Contestant::SetVaccineCount(int vaccineCount) {
     this->vaccineCount = vaccineCount;
 }
+void Contestant::SetContactedList(vector<string> contactedList) {
+    this->contactedList = contactedList;
+}
+
 
 void Contestant::Reset() {
     status = false;
     type = "angel";
     vaccineCount = 0;
+    contactedList.clear();
+    contactedList.push_back(name);
 }
 
 ContactResult Contestant::Contact(Contestant player) {
